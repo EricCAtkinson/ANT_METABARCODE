@@ -1,0 +1,251 @@
+mv ~ANTS/cobb.sr.unh.edu/managed/190412_SN7001360_0465_BHY2YKBCX2_16MerEricAtk041219/reads/Sample_DG_10 ~SHEEP/
+
+source activate qiime2-2019.1    # Activate the current qiime2-environment/sandbox
+source tab-qiime                 # Load tab completion for qiime2
+
+
+
+qiime tools import\
+      --type 'SampleData[PairedEndSequencesWithQuality]'\
+      --input-path reads\
+      --source-format CasavaOneEightSingleLanePerSampleDirFmt\
+      --output-path demux.qza
+
+qiime tools import\
+      --type 'SampleData[PairedEndSequencesWithQuality]'\
+      --input-path /home/maineBK/eatkinsonmdibl18/FOX/ reads\
+      --source-format CasavaOneEightSingleLanePerSampleDirFmt\
+      --output-path /home/maineBK/eatkinsonmdibl18/FOX/ demux.qza
+                
+
+qiime tools import\
+      --type 'SampleData[PairedEndSequencesWithQuality]'\
+      --input-path ~/ANTS/cobb.sr.unh.edu/managed/190412_SN7001360_0465_BHY2YKBCX2_16MerEricAtk041219/ reads\ 
+      --source-format CasavaOneEightSingleLanePerSampleDirFmt\
+      --output-path ~/ANTS/demux.qza
+
+
+
+## this is the one below FOR FOX
+
+qiime tools import\
+      --type 'SampleData[PairedEndSequencesWithQuality]'\
+      --input-path ~/FOX/reads\
+      --source-format CasavaOneEightSingleLanePerSampleDirFmt\
+      --output-path ~/FOX/demux.qza
+For ANTS
+
+qiime tools import\
+--type 'SampleData[PairedEndSequencesWithQuality]'\
+--input-path reads\
+--input-format CasavaOneEightSingleLanePerSampleDirFmt\
+--output-path demux.qza
+
+FOR SHEEP
+qiime tools import\
+      --type 'SampleData[PairedEndSequencesWithQuality]'\
+      --input-path ~/SHEEP/reads\
+      --source-format CasavaOneEightSingleLanePerSampleDirFmt\
+      --output-path ~/SHEEP/demux.qza
+FOR WOLF
+qiime tools import\
+      --type 'SampleData[PairedEndSequencesWithQuality]'\
+      --input-path ~/WOLF/reads\
+      --source-format CasavaOneEightSingleLanePerSampleDirFmt\
+      --output-path ~/WOLF/demux.qza
+
+FOR WATER18S
+qiime tools import\
+      --type 'SampleData[PairedEndSequencesWithQuality]'\
+      --input-path ~/WATER18S/reads\
+      --source-format CasavaOneEightSingleLanePerSampleDirFmt\
+      --output-path ~/WATER18S/demux.qza
+
+The folder should have all the read files you are trying to import, and nothing else. From the project folder I usually do:
+mkdir reads
+cp */*.gz reads
+
+
+Then import
+
+~/ANTS$ cp ~ANTS/cobb.sr.unh.edu/managed/190412_SN7001360_0465_BHY2YKBCX2_16MerEricAtk041219/reads/*.gz ~/ANTS/reads
+
+
+cp */*.gz ~/ANTS/reads
+
+
+FOR THE ANTS
+
+
+mv ~ANTS/cobb.sr.unh.edu/managed/190412_SN7001360_0465_BHY2YKBCX2_16MerEricAtk041219/reads/Sample_C* ~WOLF/
+
+
+#FOR EACH RUN, WHEN RECONNECTING, MUST ADD QIIME
+source activate qiime2-2018.6    # Activate the current qiime2-environment/sandbox
+source tab-qiime                 # Load tab completion for qiime2
+
+
+
+# reran with Nic, after figuring that I had issues with the ant data
+
+
+
+
+qiime demux summarize\
+      --i-data demux.qza\
+      --o-visualization demux.qzv
+
+nohup qiime dada2 denoise-paired\
+--i-demultiplexed-seqs demux.qza\
+--p-trim-left-f 0 --p-trim-left-r 0\
+--p-trunc-len-f 165 --p-trunc-len-r 125\
+--p-n-threads 72\
+--o-representative-sequences rep-seqs\
+--o-table table\
+--o-denoising-stats dns
+
+qiime metadata tabulate\
+--m-input-file dns.qza\
+--o-visualization dns.qzv
+
+
+
+#FOR FOX SET FR AT 100 AND RR AT 100
+
+nohup qiime dada2 denoise-paired\
+--i-demultiplexed-seqs demux.qza\
+--p-trim-left-f 0 --p-trim-left-r 0\
+--p-trunc-len-f 100 --p-trunc-len-r 100\
+--p-n-threads 72\
+--o-representative-sequences rep-seqs\
+--o-table table\
+--o-denoising-stats dns
+
+#FOR SHEEP SET FR AT 246 AND RR AT 188
+
+nohup qiime dada2 denoise-paired\
+      --i-demultiplexed-seqs demux.qza\
+      --p-trim-left-f 0 --p-trim-left-r 0\
+      --p-trunc-len-f 100 --p-trunc-len-r 100\
+      --p-n-threads 72\
+      --o-representative-sequences rep-seqs\
+      --o-table table\
+      --o-denoising-stats dns
+
+#FOR WOLF SET FR AT ** AND RR AT **
+
+nohup qiime dada2 denoise-paired\
+      --i-demultiplexed-seqs demux.qza\
+      --p-trim-left-f 0 --p-trim-left-r 0\
+      --p-trunc-len-f 100 --p-trunc-len-r 100\
+      --p-n-threads 72\
+      --o-representative-sequences rep-seqs\
+      --o-table table\
+      --o-denoising-stats dns
+
+#FOR WATER18S SET FR AT 228 AND RR AT 200
+
+nohup qiime dada2 denoise-paired\
+      --i-demultiplexed-seqs demux.qza\
+      --p-trim-left-f 0 --p-trim-left-r 0\
+      --p-trunc-len-f 228 --p-trunc-len-r 200\
+      --p-n-threads 72\
+      --o-representative-sequences rep-seqs\
+      --o-table table\
+      --o-denoising-stats dns
+
+
+# I got to here Saturday evening. Left running with nohup
+
+
+# Below is what Devin recently sent:
+
+nohup qiime feature-classifier classify-sklearn \
+--i-classifier ../silva-132-99-515-806-nb-classifier.qza<https://data.qiime2.org/2019.1/common/silva-132-99-515-806-nb-classifier.qza> \
+--i-reads rep-seqs.qza \
+--o-classification taxonomy.qza
+
+nohup qiime feature-classifier classify-sklearn \
+wget https://data.qiime2.org/2019.1/common/silva-132-99-515-806-nb-classifier.qza 
+--i-classifier /home/share/databases/SILVA_databases/silva-132-99-515-806-nb-classifier.qza \
+--i-reads rep-seqs.qza \
+--o-classification taxonomy.qza
+
+This one--
+
+nohup qiime feature-classifier classify-sklearn \
+--i-classifier ../silva-132-99-515-806-nb-classifier.qza \
+--i-reads rep-seqs.qza \
+--o-classification taxonomy.qza
+
+## this if from the oslo university pdf
+
+qiime feature-classifier classify-sklearn \
+--i-classifier gg-13-8-99-515-806-nb-classifier.qza \
+--i-reads rep-seqs.qza \
+--o-classification taxonomy.qza
+##
+
+
+# Move on from here?
+
+qiime feature-table summarize\
+      --i-table table.qza
+      --m-sample-metadata-file mdat.tsv\  #I need a metadata file here
+      --o-visualization table
+qiime feature-table tabulate-seqs\
+      --i-data rep-seqs.qza\
+      --o-visualization rep-seqs
+
+
+
+# I THINK THIS CODE BELOW IS CLEAN AND AM RUNNING FOR ANTS FOX AND SHEEP MONDAY NIGHT
+
+# Use the code abover for the classifier instead of this below?
+
+ 
+nohup qiime feature-classifier classify-consensus-blast\
+--i-query rep-seqs.qza\
+--i-reference-reads /data/share/databases/SILVA_databases/SILVA_132_QIIME_release/rep_set/rep_set_all/99/silva132_99.qza\
+--i-reference-taxonomy /data/share/databases/SILVA_databases/SILVA_132_QIIME_release/taxonomy/taxonomy_all/99/majority_taxonomy_all_levels.qza\
+--o-classification taxonomy.qza\
+--p-perc-identity .8\
+--p-maxaccepts 4\ 
+
+
+# Ran up to here on ANTS successfully, now I need to output a visualization of the table, apparently.  Nope, issues....
+#  issues below with the metadata and the taxonomy.qzv not existing....
+#stopped here Monday night to see if the taxonomy.qza is output from above.
+
+qiime metadata tabulate\
+     --m-input-file taxonomy.qza\
+      --o-visualization taxonomy.qzv\
+qiime taxa barplot\
+--i-table table.qza\
+--i-taxonomy taxonomy.qza\
+--m-metadata-file mdat.tsv\
+--o-visualization taxa-barplots.qzv
+qiime taxa collapse\
+          --i-table table.qza\
+          --i-taxonomy taxonomy.qza\
+          --p-level 1\
+          --o-collapsed-table taxa-table\
+
+qiime taxa barplot\
+      --i-table table.qza\
+      --i-taxonomy taxonomy.qza\
+      --m-metadata-file mdat.tsv\
+      --o-visualization taxa-barplots.qzv
+
+
+#qiime feature-table heatmap\
+#      --i-table taxa-table.qza\
+#      --m-metadata-file mdat.tsv\
+#      --o-visualization heatmap.qzv\
+#      --m-metadata-column Ship
+
+
+nohup qiime feature-classifier classify-sklearn \
+--i-classifier ../silva-132-99-515-806-nb-classifier.qza \
+--i-reads rep-seqs.qza \
+--o-classification taxonomy.qza
