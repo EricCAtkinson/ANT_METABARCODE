@@ -1,0 +1,244 @@
+# THIS QIIME2 PIPELINE IS FOR METABARCODING HYMENOPTERA 16S METABARCODE SEQUENCES GAINED FROM UNH.  WE RAN THIS CODE DURING FALL 2024
+
+# QIIME2 PIPELINE IS DONE FROM THE TERMINAL INTERFACE ON WILDIRIS-- YOU CAN GET THERE DIRECTLY FROM ‘terminal’ on a Mac as long as you’ve set up an ssh key or in Windows terminal on a Windows 10 machine.
+# You can also get a terminal interface by going to https://medicinebow.arcc.uwyo.edu/ then navigating to  ‘Medicine Bow Shell Access’ from your Dashboard.
+
+#Run ALL THIS CODE From your root (home) directory.   
+
+# The hashtag is a comment meaning that the computer will NOT read the text on the line that holds the number sign #  Hence, it is a VERY GOOD IDEA to comment your code lots!
+
+
+#For example, my home directory (my root directory) is : /home/eatkins1
+
+#To check to make sure where you are enter the following command: ‘pwd’ which stands for present working directory or path to your working directory.  
+
+pwd
+
+# To see the list of files within your directory (folder) you can use the ls command like this (all lower case)
+
+ls
+
+# If you want to see the characteristics of the file use the ls command with an option like this
+
+ls -lht
+
+
+#Run in interactive session with more cpus (once we get to taxonomy, we need to increase the memory, time, and cpus— so, I just reset a salloc job here to begin with that will be sufficient.)— that will come later….
+#FOR right now we will just run interactively from the terminal after you log on to ARCC (Wildlris on MedicineBow)…..  
+
+#Go to the terminal window in the OnDemand interface of Medicinebow.
+
+
+
+# Load QIIME2 module.  QIIME2 is a program, an application if you will, that will take us through parsing, manipulating, and analyzing the microbiome nucleotide sequences of all the Hymenoptera samples with respect to the microbes they harbor as we’ve extracted DNA, amplified with PCR on the v4/v5 region, and sequenced. 
+
+#When you want to load a module, any module, this is like an app or a program (and executable) you write the command (type in the text within the ‘) : ‘module load <your program>’
+
+#This loaded qiime2 and its two sub apps.  The number stands for a version number corresponding to May of this year (2024)
+
+module load qiime2-metagenome/2024.5
+module load qiime2-amplicon/2024.5
+source tab-qiime
+
+# To check to see what modules (programs) are loaded in your work environment, do this command: ‘module spider’
+
+module spider
+
+
+### okay, so you can stop here and make sure you have QIIME2 loaded.  Scroll up and see all the applications that are enabled.  
+#Then, we’ll move on.
+
+#The first thing we need to do is called demultiplexing (or demuxing).  Here’s some info to 
+#help understand what we need to do.
+
+
+#In genomics, demuxing (or demultiplexing) refers to the process of sorting and #separating individual DNA or RNA sequences from a mixture of samples that were #sequenced together in a single run. This process is commonly used in high-throughput #sequencing pipelines, where multiple samples are processed in parallel to save time and #reduce costs.
+#Here's how it works in genomics:
+#1 Sample Barcoding: Before sequencing, unique DNA "barcodes" or "indexes" are added #to each sample. These short, unique sequences are added to the DNA or RNA fragments, #allowing each fragment's origin to be identified after sequencing.
+#2 Sequencing Run: Samples are pooled together and run through a high-throughput sequencer, generating a large dataset that contains data from all samples mixed together.
+#3 Demultiplexing: After sequencing, bioinformatics tools are used to separate or
+#”demux" the sequences based on their unique barcodes. This process groups reads
+# according to their barcodes, effectively sorting them back into their respective sample
+# origins.
+# 4 Further Analysis: Once the reads are separated by sample, they can be analyzed 
+# individually for alignment, variant calling, expression analysis, or other genomic studies.
+# Demultiplexing is crucial for handling multiplexed sequencing data and ensuring that # each sample is correctly identified and analyzed in downstream bioinformatics pipelines.
+
+# if you want to know more about demuxing and want a good recipe, go to Dr. Sean Harrington’s (UWYO INBRE Data Science Core) Github page (https://github.com/seanharrington256/WildIris_Qiime2?tab=readme-ov-file#31-demultiplexing). Sean has a tutorial here with some sample date if you want to try it.  
+
+#DEMUXING
+
+#making a demux file  
+
+qiime tools import \
+--type "SampleData[PairedEndSequencesWithQuality]" \
+--input-format CasavaOneEightSingleLanePerSampleDirFmt \
+--input-path /project/wi-nwchymenoptera/2024/reads \
+--output-path demux
+
+## Then we have to make a file (*.qzv) here, a demux.qzv that we can look at.  *.qzv files are namely that, visualization files and we ultimately cannot look at them on WildIris.  We must download them to your computer then upload them to a website called qiime2view (https://view.qiime2.org/).  You can download the files from your Home Directory as accessed from your Dashboard
+
+#making a QIIME2 visualization which is a demux.qzv
+#the step below will allow tab complete to work
+
+source tab-qiime
+qiime demux summarize \
+--i-data demux.qza \
+--o-visualization demux
+
+## So, here you can then download the demux.qzv file to your local computer.  Use the on demand gui interface (HOME ICON) (there are other ways to do this but we won’t worry about that now) and download demux.qzv to your local computer.  Do the same for the demux.qza file, too (that file contains the demuxing data and can be viewed in QIIME2view as well but it will give you tabular information— good for inspection of data).
+
+## drag your demux.qzv to qiime2view and let’s look at the patterns….. we can do this together.
+
+
+
+
+## TO LOOK AT THE INDIVIDUAL FASTQ FILES TO SEE THE QUALITY, RUN FASTQC AS BELOW— If you do this and look and the data look okay, that’s fine  So, this fastqc is optional.  DONT RUN THIS STUFF
+
+module load arcc/1.0
+module spider fastqc
+module load gcc/14.2.0 fastqc/0.12.1
+
+
+# make a directory to store the output within your home directory rather than inside the project directory
+mkdir fastqc_raw-reads2
+# run the program— this reads in from the project directory and outputs to the fastqc_raw-reads2 directory within your home directory (you just made this)
+fastqc /project/wi-nwchymenoptera/2024/reads/*_R1_* reads/*_R2_* -o fastqc_raw-reads2
+
+ls fastqc_raw-reads2
+# the resulting folder should contain a zipped archive and an html file, we can ignore the zipped archive which is redundant.  To look at the html files, you need to download them and look at them with a browser (they are html files)
+
+
+## Now, upon looking at the demux.qzv graph (in qiime2view) we determine where you want to trim (at the beginning of the reads) and where you want to truncate (at the end of the reads).  You select a suitable PHRED score (a measure of quality or certainty/confidence that the correct nucleotide base (ATCG) was ‘called’….  PHRED scores are logarithmic.  I would look at scores to keep better than 20.  
+
+# So, do you want to trim any bases off the beginning of the forward reads and the beginning of the reverse reads?  Below, the *** means that you put the value in there that you want.  For both the forward and reverse we know the sequences.  The forward primer is 19 bases; the reverse primer is 20 bases.
+# forward primer = GTGYCAGCMGCCGCGGTAA 
+# reverse primer = CCGYCAATTYMTTTRAGTTT
+# Do you want to trim any bases off the end of the forward reads and the end of the reverse reads?Below, the *** means that you put the value in there that you want.  
+
+# By the way, the backward slash \ means a ‘carriage return’ which is probably foreign to most of you.  Who has used a real typewriter?  You’ll know.  It is really just a way to clean up your code and make it more readable to us so it is like a ‘return’ on the keyboard.
+
+
+qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs demux.qza \
+  --p-trim-left-f 19 \
+  --p-trim-left-r 20 \
+  --p-trunc-len-f 240 \
+  --p-trunc-len-r 240 \
+  --o-table table.qza \
+  --o-representative-sequences rep-seqs.qza \
+  --o-denoising-stats denoising-stats.qza
+
+# So, now what we have are a table.qza with the trimmed and truncated sequences, a listing and representation of the representative sequences after they’ve been shortened for use in downstream steps.  And a stats file that helps with interpretation of what you did and what was lost or gained.  These are ultimately all files to feed into the downstream processes.
+
+# Here we need to make viewable versions of this *.qza files that you made above but what would be nice is to link them to your real sample data (like the species of hymenopteran, the age class, or other variables) before going any further.  This data file is going to be called a metadata file.  It needs to be a text file and you can make that in Excel. Specifically, you’ll want a ‘tab-separated variable’ file (*.tsv).
+
+# This is the metadata file /project/wi-nwchymenoptera/2024/HYMENOPTERA_SAMPLES23.tsv
+
+
+
+# make some summaries:  
+qiime feature-table summarize \
+ --i-table table.qza \
+ --o-visualization table.qzv \
+ --m-sample-metadata-file /project/wi-nwchymenoptera/2024/HYMENOPTERA_SAMPLES23.tsv
+
+qiime feature-table tabulate-seqs \
+  --i-data rep-seqs.qza \
+  --o-visualization rep-seqs.qzv
+
+qiime metadata tabulate \
+  --m-input-file denoising-stats.qza \
+  --o-visualization denoising-stats.qzv  
+
+#From Sean’s GitHub:
+
+qiime phylogeny align-to-tree-mafft-fasttree \
+  --i-sequences rep-seqs.qza \
+  --o-alignment aligned-rep-seqs.qza \
+  --o-masked-alignment masked-aligned-rep-seqs.qza \
+  --o-tree unrooted-tree.qza \
+  --o-rooted-tree rooted-tree.qza
+
+
+# We need to look at the table.qzv to assess the sampling depth.  We may need to drop samples from analysis or parse at a minimum to maintain keeping all samples….Like what I did on NSHR (see code below) and the first sample drops off at 15 sampling depth.  So, we’ll select 14 as the minimum so as to keep all samples (19 samples)
+
+# All these lines below are comments to help us navigate what we are doing.  Go down below the multiple hashtags to the diversity core metrics….
+
+##In genomics, sampling depth (also called sequencing depth or read depth) refers to the number of times a particular nucleotide in the DNA sequence is read during #sequencing. It is a measure of how many individual reads or observations cover a specific base position in the genome.
+#Why is Sampling Depth Important?
+1. Accuracy: Higher sampling depth improves the confidence in detecting true genetic variants (e.g., single-nucleotide polymorphisms, insertions, deletions). It reduces the chances of sequencing errors being misinterpreted as real variants.
+2. Coverage: A higher depth ensures that low-abundance or rare variants in a heterogeneous sample (e.g., tumor-normal samples, microbial communities) are more likely to be detected.
+3. Sensitivity in Complex Regions: Regions of the genome with high GC content, repeats, or structural variation may require higher depth for accurate representation.
+Types of Sampling Depth
+* Mean Depth: The average number of reads across all positions in the genome or targeted regions.
+* Per-base Depth: The depth of coverage at a specific nucleotide or position.
+* Uniformity of Depth: The consistency of read depth across the genome or targeted regions.
+Typical Depths
+* Whole-genome sequencing (WGS): Typically 30x for human genomes (where "x" represents average coverage).
+* Targeted sequencing (e.g., exome or gene panels): Often higher, ranging from 100x to 200x or more, to ensure sensitivity in the targeted regions.
+* Single-cell sequencing: Generally lower, as the input DNA is more limited.
+Trade-offs
+* Higher Depth: Increases accuracy and sensitivity but is more expensive and computationally intensive.
+* Lower Depth: Reduces cost but may lead to missed variants or less confident results.
+Thus, sampling depth is a critical parameter that needs to be optimized based on the experimental goals, sample type, and budget.
+
+###### 
+
+qiime diversity core-metrics-phylogenetic \
+  --i-phylogeny rooted-tree.qza \
+  --i-table table.qza \
+  --p-sampling-depth 1 \
+  --m-metadata-file /project/wi-nwchymenoptera/2024/HYMENOPTERA_SAMPLES23.tsv \
+  --output-dir core-metrics-results
+
+##### NEED TO MAKE A ref-seqs.qza file 
+#####. This is directly from Sean’s GitHub and I pasted it here on 12/3/24. I HAVE CHANGED the primer sequences to those that we used.
+
+
+qiime feature-classifier extract-reads \ 
+--i-sequences /project/wi-nwchymenoptera/silva-138-99-seqs.qza \ 
+--p-f-primer GTGYCAGCMGCCGCGGTAA \ 
+--p-r-primer CCGYCAATTYMTTTRAGTTT \ 
+--p-min-length 100 \ 
+--p-max-length 400 \ 
+--o-reads ref-seqs.qza
+
+# TAXABARPLOT PRODUCTION
+# I uploaded silva-138-99-tax.qza to /project/
+
+qiime feature-classifier fit-classifier-naive-bayes \
+  --i-reference-reads ref-seqs.qza \
+  --i-reference-taxonomy /project/wi-nwchymenoptera/silva-138-99-tax-515-806.qza \
+  --o-classifier classifier.qza
+
+qiime feature-classifier classify-sklearn \
+  --i-classifier classifier.qza \
+  --i-reads rep-seqs.qza \
+  --o-classification taxonomy.qza
+
+## We need to link into the metadata file (this is the data file with sample ID matched to the reads and the Hymenoptera species, etc.  We need to populate some fields in the original data file better but for now this works. Here is the path /project/wi-nwchymenoptera/2024/HYMENOPTERA_SAMPLES23.tsv
+
+
+qiime metadata tabulate \
+  --m-input-file taxonomy.qza \
+  --o-visualization taxonomy.qzv
+
+##. ALL THIS WORKED AND I GOT A TAXABARPLOT..... WHAT WE REALLY NEXT NEED TO DO IS TO SANGER SEQUENCE THE REMAINING DNA SAMPLES TO GET SPP IDENTIFICATION THEN REVAMP THE METADATA FILE
+
+qiime taxa barplot \
+--i-table table.qza \
+--i-taxonomy taxonomy.qza \
+--m-metadata-file  /project/wi-nwchymenoptera/2024/HYMENOPTERA_SAMPLES23.tsv \
+--o-visualization barplots
+
+## WE CAN WINNOW OR PARSE TO JUST USE THE BALDFACED HORNETS AND RUN NONPARAMETRIC TESTS ON THE DIFFERENT CASTES LOOKING FOR DIFFERENCES IN ALPHA DIVERSITY AND EVENNESS AS I DID FOR NSHR.  Find that code...
+
+
+
+
+
+
+
+
+
