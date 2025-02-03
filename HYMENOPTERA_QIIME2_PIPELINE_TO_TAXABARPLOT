@@ -93,7 +93,7 @@ qiime demux summarize \
 
 
 
-## TO LOOK AT THE INDIVIDUAL FASTQ FILES TO SEE THE QUALITY, RUN FASTQC AS BELOW— If you do this and look and the data look okay, that’s fine  So, this fastqc is optional.  DONT RUN THIS STUFF
+## ONLY IF YOU WANT TO:  TO LOOK AT THE INDIVIDUAL FASTQ FILES TO SEE THE QUALITY, RUN FASTQC AS BELOW— If you do this and look and the data look okay, that’s fine  So, this fastqc is optional.  DONT RUN THIS STUFF
 
 module load arcc/1.0
 module spider fastqc
@@ -117,7 +117,7 @@ ls fastqc_raw-reads2
 # Do you want to trim any bases off the end of the forward reads and the end of the reverse reads?Below, the *** means that you put the value in there that you want.  
 
 # By the way, the backward slash \ means a ‘carriage return’ which is probably foreign to most of you.  Who has used a real typewriter?  You’ll know.  It is really just a way to clean up your code and make it more readable to us so it is like a ‘return’ on the keyboard.
-
+# ALSO, I had issues commenting within the qiime command (for instance, in the dada2 denoise-paired command below, I had commented reasons why I trimmed at 19 and 20 (this removes the primers) and truncated at 240) by commenting directly within the command.  It made it choke so don't do that.
 
 qiime dada2 denoise-paired \
   --i-demultiplexed-seqs demux.qza \
